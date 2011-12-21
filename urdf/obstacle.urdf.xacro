@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+
+<robot name="obstacle"
+  xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model"
+  xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+  xmlns:body="http://playerstage.sourceforge.net/gazebo/xmlschema/#body"
+  xmlns:geom="http://playerstage.sourceforge.net/gazebo/xmlschema/#geom"
+  xmlns:joint="http://playerstage.sourceforge.net/gazebo/xmlschema/#joint"
+  xmlns:xacro="http://www.ros.org/wiki/xacro"
+  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+  >
+
+<xacro:macro name="set_materials" params="link color">
+    <gazebo reference="${link}">
+        <material>Gazebo/${color}</material>
+	<!--<turnGravityOff>true</turnGravityOff>-->
+    </gazebo>
+</xacro:macro>
+
+<xacro:set_materials link="obstacle" color="Blue" />
+
+<link name="obstacle">
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="1000" />
+      <inertia  ixx="1000" ixy="0.0"  ixz="0.0"  iyy="1000"  iyz="0.0"  izz="1000" />
+    </inertial>
+    <visual>
+        <geometry>
+            <cylinder length="10" radius="1"/>
+	    <!--<sphere radius="1"/>-->
+        </geometry>
+    </visual>
+    <collision>
+      <geometry>
+	<!--<sphere radius="1"/>-->
+        <cylinder length="10" radius="1"/>
+      </geometry>
+    </collision>
+</link>
+
+</robot>

@@ -1,0 +1,23 @@
+<package>
+  <description brief="quadrotor_obstacle_avoidance">
+
+	Implementation of obstacle avoidance through the use of artificial
+	potential field for a quadrotor.
+
+  </description>
+  <author>Davide Aversa, Vittorio Perera</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/</url>
+  <depend package="std_msgs"/>
+  <depend package="roscpp"/>
+  <depend package="gazebo"/>
+  <depend package="gazebo_plugins"/>
+
+  <export>
+    <gazebo plugin_path="${prefix}/lib" />
+  </export>
+
+</package>
+
+

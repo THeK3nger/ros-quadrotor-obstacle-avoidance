@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+
+<robot name="quadrotor_model"
+  xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model" 
+  xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor" 
+  xmlns:body="http://playerstage.sourceforge.net/gazebo/xmlschema/#body" 
+  xmlns:geom="http://playerstage.sourceforge.net/gazebo/xmlschema/#geom" 
+  xmlns:joint="http://playerstage.sourceforge.net/gazebo/xmlschema/#joint"
+  xmlns:xacro="http://www.ros.org/wiki/xacro"
+  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+  >
+
+<xacro:macro name="set_materials" params="link color">
+    <gazebo reference="${link}">
+        <material>Gazebo/${color}</material>
+    </gazebo>
+</xacro:macro>
+
+<xacro:macro name="motor" params="id origin">
+    <link name="motor${id}">
+        <inertial>
+            <origin xyz="${origin}" />
+	    <mass value="0.05" />
+	    <inertia  ixx="0.0" ixy="0.0"  ixz="0.0"  iyy="0.0"  iyz="0.0"  izz="0.0" />
+        </inertial>
+        <visual>
+            <origin xyz="${origin}" />
+            <geometry>
+                <cylinder length="0.03" radius="0.02" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="${origin}" />
+            <geometry>
+                <cylinder length="0.03" radius="0.02" />
+            </geometry>
+        </collision>
+    </link>
+</xacro:macro>
+
+<xacro:macro name="rotor" params="id origin">
+    <link name="rotor${id}">
+        <inertial>
+            <origin xyz="${origin}" />
+	    <mass value="0.01" />
+            <inertia  ixx="0.0" ixy="0.0"  ixz="0.0"  iyy="0.0"  iyz="0.0"  izz="0.0" />
+        </inertial>
+        <visual>
+            <origin xyz="${origin}" />
+            <geometry>
+		
+                <cylinder length="0.005" radius="0.1" />
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="${origin}" />
+            <geometry>
+                <cylinder length="0.005" radius="0.1" />
+            </geometry>
+        </collision>
+    </link>
+</xacro:macro>
+
+<xacro:macro name="join" params="j1 j2">
+    <joint name="${j1}_to_${j2}" type="fixed">
+        <parent link="${j1}" />
+        <child link="${j2}" />
+        <origin xyz="0 0 0"/>
+    </joint>
+</xacro:macro>
+
+<xacro:macro name="quadrotor">
+    <!-- MATERIALS -->
+    <xacro:set_materials link="chassis_body" color="Black" />
+    <xacro:set_materials link="arm1" color="Black" />
+    <xacro:set_materials link="arm2" color="Black" />
+    <xacro:set_materials link="motor1" color="Red" />
+    <xacro:set_materials link="motor2" color="Blue" />
+    <xacro:set_materials link="motor3" color="Blue" />
+    <xacro:set_materials link="motor4" color="Blue" />
+
+    <link name="chassis_body">
+        <inertial>
+          <origin xyz="0 0 0" />
+          <mass value="0.64" />
+	  <inertia  ixx="0.02" ixy="0.0"  ixz="0.0"  iyy="0.02"  iyz="0.0"  izz="0.04" />
+        </inertial>
+        <visual>
+	    <geometry>
+		<!--<box size="0.09 0.09 0.09" />-->
+		
+                <mesh filename="package://quadrotor_obstacle_avoidance/mesh/quadrotorblender.stl" scale="0.5 0.5 0.5"/>
+            </geometry>
+        </visual>
+        <collision>
+          <geometry>
+		<box size="0.09 0.09 0.09" />
+          </geometry>
+        </collision>
+    </link>
+
+
+    <!--<link name="arm1">
+        <inertial>
+            <origin xyz="0 0 0" />
+            <mass value="0.1" />
+            <inertia  ixx="0.0" ixy="0.0"  ixz="0.0"  iyy="0.0"  iyz="0.0"  izz="0.0" />
+        </inertial>
+        <visual>
+          <origin xyz="0 0 0" />
+          <geometry>
+            <box size="0.38 0.03 0.005" />
+          </geometry>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" />
+          <geometry>
+            <box size="0.38 0.03 0.005" />
+          </geometry>
+        </collision>
+    </link>
+
+    <xacro:join j1="chassis_body" j2="arm1" />
+
+    <link name="arm2">
+        <inertial>
+            <origin xyz="0 0 0" />
+            <mass value="0.1" />
+            <inertia  ixx="0.0" ixy="0.0"  ixz="0.0"  iyy="0.0"  iyz="0.0"  izz="0.0" />
+        </inertial>
+        <visual>
+          <origin xyz="0 0 0" />
+          <geometry>
+            <box size="0.03 0.38 0.005" />
+          </geometry>
+        </visual>
+        <collision>
+          <origin xyz="0 0 0" />
+          <geometry>
+            <box size="0.03 0.38 0.005" />
+          </geometry>
+        </collision>
+    </link>
+
+    <xacro:join j1="chassis_body" j2="arm2" />
+    <xacro:motor id="1" origin="0.172 0 0.01"/>
+    <xacro:join j1="arm1" j2="motor1" />
+    <xacro:motor id="2" origin="-0.172 0 0.01"/>
+    <xacro:join j1="arm1" j2="motor2" />
+    <xacro:motor id="3" origin="0 -0.172 0.01"/>
+    <xacro:join j1="arm2" j2="motor3" />
+    <xacro:motor id="4" origin="0 0.172 0.01"/>
+    <xacro:join j1="arm2" j2="motor4" />
+    <xacro:rotor id="1" origin="0.172 0  0.02" />
+    <xacro:join j1="motor1" j2="rotor1" />
+    <xacro:rotor id="2" origin="-0.172 0  0.02" />
+    <xacro:join j1="motor2" j2="rotor2" />
+    <xacro:rotor id="3" origin="0 -0.172 0.02" />
+    <xacro:join j1="motor3" j2="rotor3" />
+    <xacro:rotor id="4" origin="0 0.172 0.02" />
+    <xacro:join j1="motor4" j2="rotor4" />-->
+
+
+<!-- CONTROLLER-->
+    <gazebo>
+	<controller:feedback_linearization name="feedback_linearization" plugin="libfeedbacklinearization.so">
+            <alwaysOn>true</alwaysOn>
+            <update>1000</update>
+            <updateRate>1000.0</updateRate>
+        </controller:feedback_linearization>
+
+        <canonicalBody>chassis_body</canonicalBody>
+    </gazebo>
+
+
+
+
+</xacro:macro>
+
+<xacro:quadrotor />
+
+<include filename="$(find quadrotor_obstacle_avoidance)/urdf/quad_hokuyo_laser.xacro" />
+
+<xacro:quad_hokuyo_laser parent="chassis_body" />
+
+</robot>

@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<robot
+    xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+    xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+    xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface">
+    
+    <macro name="quad_hokuyo_laser" params="parent">
+        <joint name="laser_base_mount_joint" type="fixed">
+            <origin xyz="0 0 0.045" rpy="0 0 0" />
+	    <axis xyz="0 1 0" />
+            <parent link="${parent}"/>
+            <child link="base_scan_link"/> <!--laser_base_link-->
+        </joint>
+        
+        
+        
+        <link name="base_scan_link" type="laser">
+            <inertial>
+                <mass value="0.01"/>
+                <origin xyz="0 0 0"/>
+                <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
+            </inertial>
+            
+            <visual>
+                <origin rpy="0 0 0" xyz="0.17 0 -0.025"/>
+                <geometry>
+                    <!--<cylinder radius="0.0229" length="0.028"/>-->
+		    <sphere radius="0.01"/>
+		    <!--<box size="0.2 0.02 0.015" />-->
+                </geometry>
+            </visual>
+            
+            <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <cylinder radius="0.0229" length="0.028"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <gazebo reference="base_scan_link">
+            <sensor:ray name="laser">
+		<alwaysActive>true</alwaysActive>
+                <rayCount>45</rayCount>
+                <rangeCount>45</rangeCount>
+                <laserCount>1</laserCount>
+                
+                <origin>0.0 0.0 0.035</origin>
+                <displayRays>false</displayRays>
+                
+                <minAngle>-180</minAngle>
+                <maxAngle> 180</maxAngle>
+                
+		<verticalMinAngle>-90</verticalMinAngle>
+		<verticalMaxAngle>90</verticalMaxAngle>
+
+		<verticalRayCount>90</verticalRayCount>
+		<verticalRangeCount>90</verticalRangeCount>
+
+
+                <minRange>1</minRange>
+                <maxRange>4.0</maxRange>
+                <resRange>0.001</resRange>
+                <updateRate>10.0</updateRate>
+                
+                <controller:gazebo_ros_block_laser name="ray_block_controller" plugin="libgazebo_ros_block_laser.so">
+                    <gaussianNoise>0.005</gaussianNoise>
+                    <alwaysOn>true</alwaysOn>
+                    <updateRate>10.0</updateRate>
+                    <topicName>full_cloud</topicName>
+                    <frameName>base_scan_link</frameName>
+                    <interface:laser name="gazebo_ros_base_scan_link_iface"/>
+                </controller:gazebo_ros_block_laser>
+            </sensor:ray>
+        </gazebo>
+        
+        <gazebo reference="laser_base_link">
+            <material>Erratic/Red</material>
+        </gazebo>
+        
+        <gazebo reference="base_scan_link">
+            <material>Erratic/Red</material>
+        </gazebo>
+    </macro>
+
+   <!--<quad_hokuyo_laser parent="0" origin="0" />-->
+
+</robot>
+

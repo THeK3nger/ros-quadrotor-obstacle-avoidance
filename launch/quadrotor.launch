@@ -1,0 +1,43 @@
+<launch>
+
+    <node name="gazebo" pkg="gazebo" type="gazebo" 
+          args="$(find gazebo_worlds)/worlds/empty.world" output="screen" respawn="false" />
+
+    <!-- send the erratic robot XML to param server -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find quadrotor_obstacle_avoidance)/urdf/quadrotor.urdf.xacro'" />
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <node name="spawn_robot" pkg="gazebo" type="spawn_model"
+          args="-param robot_description
+                -urdf
+                -z 7
+		-Y 0
+                -model robot_description"
+          respawn="false" output="screen" />
+
+    <param name="obstacle1" command="$(find xacro)/xacro.py '$(find quadrotor_obstacle_avoidance)/urdf/obstacle.urdf.xacro'" />
+
+    <node name="obstacle1" pkg="gazebo" type="spawn_model"
+          args="-param obstacle1
+                -urdf
+		-x 5
+                -y 3
+                -z 5.05
+                -model obstacle1"
+          respawn="false" output="screen" />
+
+<param name="obstacle2" command="$(find xacro)/xacro.py '$(find quadrotor_obstacle_avoidance)/urdf/obstacle.urdf.xacro'" />
+
+    <node name="obstacle2" pkg="gazebo" type="spawn_model"
+          args="-param obstacle2
+                -urdf
+		-x 13
+                -y 13
+                -z 5.05
+                -model obstacle2"
+          respawn="false" output="screen" />
+
+
+
+
+</launch>
