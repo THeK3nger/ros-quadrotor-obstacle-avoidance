@@ -28,7 +28,7 @@ double Iy=0.02;
 double Iz=0.04;
 double Ir=10^-3;
 double g=9.81;
-double omega=0;
+double omega=0; // Remove gyroscopic effect.
 double l=0.165;
 double d=4.5* pow(10,-7);
 
@@ -207,8 +207,10 @@ double* force_vector(double* position, double yaw, double* goal, double* obstacl
 	// Computing the repulsive gradient.
 	ob_distance=sqrt(pow(obstacle[0],2) + pow(obstacle[1],2) + pow(obstacle[2],2))-r;
 	
+    // NOTE: This formula is an approximation.
+    // TODO: Change gain with the true equation.
 	if(ob_distance<dmax){
-		gain = kr*(1/ob_distance - 1/dmax)*(1/pow(ob_distance,3));
+        gain = -kr*(1/ob_distance - 1/dmax)*(1/pow(ob_distance,3));
 	}else{
 		gain=0;
 	}
@@ -219,10 +221,10 @@ double* force_vector(double* position, double yaw, double* goal, double* obstacl
 	grad_rep[3]= 0;
 		
 	// Computing the total gradient.
-	grad[0]=grad_att[0]-grad_rep[0];
-	grad[1]=grad_att[1]-grad_rep[1];
-	grad[2]=grad_att[2]-grad_rep[2];
-	grad[3]=grad_att[3]-grad_rep[3];
+    grad[0]=grad_att[0]+grad_rep[0];
+    grad[1]=grad_att[1]+grad_rep[1];
+    grad[2]=grad_att[2]+grad_rep[2];
+    grad[3]=grad_att[3]+grad_rep[3];
 
 	return grad;
 }
