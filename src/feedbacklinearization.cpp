@@ -57,6 +57,8 @@
 #define MAX_ROT 15  // MAX WRENCH
 #define MIN_ROT -15 // MIN WRENCH
 
+#define ENABLE_MATLAB_OUTPUT 0
+
 using namespace gazebo;
 
 /**
@@ -87,7 +89,9 @@ FeedbackLinearization::FeedbackLinearization(Entity *parent) : Controller(parent
     this->goal=new double[4];               // Goal Coordinate (goal in configuration space)
     this->obstacle=new double[3];           // Near Obstacle Coordinate
 
+#if ENABLE_MATLAB_OUTPUT
     this->id=fopen("/home/vittorio/Scrivania/presentazione/ROS/quadrotor_obstacle_avoidance/toMatlab.txt", "w");
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -252,14 +256,16 @@ void FeedbackLinearization::UpdateChild()
 
     // Deleting the previous U_tilde vector in order to compute the new one.
     delete U_tilde;
-    U_tilde=controller(X, V, id);
+    U_tilde=controller(X, V);
 
     // Numerical integration of ETA and U1.
     this->Eta = this->Eta+(U_tilde[0])*dt;
     this->U1_reale = this->U1_reale+(this->Eta)*dt;
 
+#if ENABLE_MATLAB_OUTPUT
     // Saving some usefull variables.
     toMatlab(id, X, U_tilde, FV, V);
+#endif
 
     delete FV;
     delete DP;

@@ -18,7 +18,7 @@
 #ifndef FUNCTIONLIB_HH
 #define FUNCTIONLIB_HH
 
-double * controller (double* X, double *V, FILE* id );
+double * controller (double* X, double *V );
 
 double* backward_derivative(double* X,double* X_new, double dt);
 

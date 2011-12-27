@@ -37,7 +37,7 @@ double d=4.5* pow(10,-7);
 using namespace arma;
 using namespace std;
 
-double * controller (double* X, double *V, FILE* id )
+double * controller (double* X, double * V)
 {
 	double * U = new double[4];
 	
@@ -162,9 +162,6 @@ double * controller (double* X, double *V, FILE* id )
 	// library.
 	mat U_tmp = J_inv * (V_ar-L);
 	
-	double determ=det(J_inv);
-	fprintf(id,"%f ", determ);
-	
 	U[0]= U_tmp(0,0);
 	U[1]= U_tmp(1,0);
 	U[2]= U_tmp(2,0);
@@ -198,13 +195,7 @@ double* force_vector(double* position, double yaw, double* goal, double* obstacl
 	double dmax=6;
 	double r = 0.5;
 	double gain;
-	double ob_distance;
-	double* A=new double[2];
-	double normalize;
-	
-	
-	double xl, yl;
-	
+	double ob_distance;	
 	
 	// Computing the actractive gradient for the position as the derivative of the
 	// potential field. The potential U is defined as 1/2*Ka*(distance^2).

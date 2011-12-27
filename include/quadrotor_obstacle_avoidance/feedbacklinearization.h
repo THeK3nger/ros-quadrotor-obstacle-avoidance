@@ -133,7 +133,10 @@ class Entity;
             double  U1_reale;
             double* goal;
             double* obstacle;
+
+#if ENABLE_MATLAB_OUTPUT
             FILE* id;
+#endif
             
             void goalCallback(const geometry_msgs::Point::ConstPtr& goal_msg);
             void obstacleCallback(const sensor_msgs::PointCloud::ConstPtr& obstacle_msg);
