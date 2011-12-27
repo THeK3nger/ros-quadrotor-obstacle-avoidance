@@ -377,8 +377,15 @@ void FeedbackLinearization::ObstacleQueueThread()
   }
 }
 
+/**
+  Saturation Function.
+
+  We have to saturate thrust and wrench of the
+  quadrotor to avoid "explosive" variations in the simulation.
+**/
 void FeedbackLinearization::saturationForce()
 {
+    // THRUST SATURATION
     if(this->U1_reale >= MAX && this->Eta >0){
         this->U1_reale=MAX;
         this->Eta=0;
@@ -389,6 +396,7 @@ void FeedbackLinearization::saturationForce()
         this->Eta=0;
     }
 
+    // WRENCH SATURATION
     for(int i=1; i<4; i++ ){
         if(U_tilde[i]>MAX_ROT){
             U_tilde[i]=MAX_ROT;
