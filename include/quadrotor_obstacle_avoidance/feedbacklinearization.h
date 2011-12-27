@@ -48,18 +48,62 @@ namespace gazebo
 class Joint;
 class Entity;
 
+    /**
+      This is an implementation of a Gazeebo Controller for a Quadrotor using
+      <b>Feedback Linearization</b> for controll and <b>Artificial Potential
+      Field</b> for autonomous navigation task.
+
+      Feedback Linarization is a control tecnique that transform a non-linear
+      system x'(t) = f(t) + g(t)U(t) in a linear system z'(t) = Az(t) + Bv(t)
+      through a particular input U(t).
+
+      Instead Artificial Potential Field is a navigation mathod based on an
+      artificial force field computed by sensors inputs and applied to the
+      robot.
+    **/
     class FeedbackLinearization : public Controller
     {
         public:
+          /**
+            Constructor
+          */
           FeedbackLinearization(Entity *parent);
           virtual ~FeedbackLinearization();
       
         protected:
+          /* GAZEBO STANDARD CONTROLLER METHODS */
+          /**
+            This code is executed when the controlled node is loaded.
+          **/
           virtual void LoadChild(XMLConfigNode *node);
+
+          /**
+            This code is ecexuted when the controlled node has to be saved.
+          **/
           void SaveChild(std::string &prefix, std::ostream &stream);
+
+          /**
+            This code is executed after that the controlled node is loaded and
+            has to be initialized. It's very similar to LoadChild method.
+          **/
           virtual void InitChild();
+
+          /**
+            This code is executed on Gazebo restart signal. After the execution
+            of this piece of code the node should be restored to the initial
+            configuration.
+          **/
           void ResetChild();
+
+          /**
+            This code is executed every time that the controlled node has to be
+            updated. The update rate is specified in the Gazebo world file.
+          **/
           virtual void UpdateChild();
+
+          /**
+            This code is executed when the controlled node has to be destroyed.
+          **/
           virtual void FiniChild();
       
         private:
@@ -79,6 +123,9 @@ class Entity;
             boost::thread* obstacle_callback_queue_thread_;
             boost::thread* lookat_callback_queue_thread_;
             
+            /*
+              QUADROTOR STATE
+             */
             double* X;
             double* X_prev;
             double* X_d;
