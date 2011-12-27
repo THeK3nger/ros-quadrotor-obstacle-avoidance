@@ -187,7 +187,7 @@ double* backward_derivative(double* X,double* X_new, double dt){
 	
 }
 
-double* force_vector(double* position, double yaw, double* goal, double* look_at, double* obstacle){
+double* force_vector(double* position, double yaw, double* goal, double* obstacle){
 	
 	double* grad_att=new double[4];
 	double* grad_rep=new double[4];
@@ -195,7 +195,6 @@ double* force_vector(double* position, double yaw, double* goal, double* look_at
 	double ka=5;
 	double kr=8;
 	double kyaw=5;
-	double yaw_desired;
 	double dmax=6;
 	double r = 0.5;
 	double gain;
@@ -212,20 +211,7 @@ double* force_vector(double* position, double yaw, double* goal, double* look_at
 	grad_att[0]=-ka*(position[0]-goal[0]);
 	grad_att[1]=-ka*(position[1]-goal[1]);
 	grad_att[2]=-ka*(position[2]-goal[2]);
-	
-	xl= (look_at[0]-position[0])/ sqrt(pow(look_at[0]-position[0],2)+pow(look_at[1]-position[1],2));
-	yl= (look_at[1]-position[1])/ sqrt(pow(look_at[0]-position[0],2)+pow(look_at[1]-position[1],2));
-	
-	// Computing the gradient for the yaw angle.
-	A[0]=look_at[0] - position[0];
-	A[1]=look_at[1] - position[1];
-	
-	normalize=sqrt(  pow(A[0],2)+pow(A[1],2)  );
-	A[0]=A[0]/normalize;
-	A[1]=A[1]/normalize;
-	
-	grad_att[3]=-kyaw*( A[0]*sin(yaw) - A[1]*cos(yaw) );
-	//grad_att[3]=-kyaw*(yaw-look_at[0]);
+    grad_att[3]=-kyaw*(yaw - goal[3]);
 	
 	// Computing the repulsive gradient.
 	ob_distance=sqrt(pow(obstacle[0],2) + pow(obstacle[1],2) + pow(obstacle[2],2))-r;

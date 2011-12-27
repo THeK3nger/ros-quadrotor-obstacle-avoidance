@@ -45,15 +45,23 @@
 #include <nav_msgs/Odometry.h>
 #include <boost/bind.hpp>
 
+/*
+  Utility Macros
+*/
+
 #define STAMPA(X,Y) printf("%s : %f\n",(X),(Y))
 #define LINE printf("----------\n")
-#define MAX 20
-#define MIN 1
-#define MAX_ROT 15
-#define MIN_ROT -15
+
+#define MAX 20      // MAX THRUST
+#define MIN 1       // MIN THRUST
+#define MAX_ROT 15  // MAX WRENCH
+#define MIN_ROT -15 // MIN WRENCH
 
 using namespace gazebo;
 
+/**
+  This macro link this controller to Gazebo core.
+**/
 GZ_REGISTER_DYNAMIC_CONTROLLER("feedback_linearization", FeedbackLinearization);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,9 +84,8 @@ FeedbackLinearization::FeedbackLinearization(Entity *parent) : Controller(parent
     this->Eta = 0;							// ETA.
     this->U1_reale = 6.5;					// U1 of the real quadrotor.
 
-    this->goal=new double[3];
-    this->obstacle=new double[3];
-    this->look_at=new double[3];
+    this->goal=new double[4];               // Goal Coordinate (goal in configuration space)
+    this->obstacle=new double[3];           // Near Obstacle Coordinate
 
     this->id=fopen("/home/vittorio/Scrivania/presentazione/ROS/quadrotor_obstacle_avoidance/toMatlab.txt", "w");
 }
@@ -89,9 +96,7 @@ FeedbackLinearization::~FeedbackLinearization()
 {
     delete goal_callback_queue_thread_;
     delete obstacle_callback_queue_thread_;
-    delete lookat_callback_queue_thread_;
     delete rosnode_;
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,14 +125,6 @@ void FeedbackLinearization::LoadChild(XMLConfigNode *node)
     // Subcribing the topic in which the laser messages will be published.
     sub_obstacle = rosnode_->subscribe(so_options);
 
-    // Setting options for the yaw (or the look at point) subscriber.
-    ros::SubscribeOptions sl_options = ros::SubscribeOptions::create<geometry_msgs::Point>("look_at", 1,
-                                                        boost::bind(&FeedbackLinearization::lookatCallback, this, _1),
-                                                        ros::VoidPtr(), &queue_lookat);
-
-    // Subcribing the topic in which the yaw messages will be published.
-    sub_lookat = rosnode_->subscribe(sl_options);
-
     body_main = this->parent_->GetBody("chassis_body");
 
 
@@ -155,15 +152,12 @@ void FeedbackLinearization::LoadChild(XMLConfigNode *node)
         U_tilde[i]=0;
     }
 
-    // The goal and look at point are initialized to simulate a take off
+    // The goal point is initialized to simulate a take off
     // phase.
     this->goal[0]=20;
     this->goal[1]=20;
     this->goal[2]=7;
-
-    this->look_at[0]=7;
-    this->look_at[1]=0;
-    this->look_at[2]=0;
+    this->goal[3]=0;
 
     // The obstacle is initialized at [1000, 1000, 1000] in order to
     // avoid any problem during the "take off" phase.
@@ -177,7 +171,6 @@ void FeedbackLinearization::InitChild()
 {
       goal_callback_queue_thread_ = new boost::thread(boost::bind(&FeedbackLinearization::GoalQueueThread, this));
       obstacle_callback_queue_thread_ = new boost::thread(boost::bind(&FeedbackLinearization::ObstacleQueueThread, this));
-      lookat_callback_queue_thread_ = new boost::thread(boost::bind(&FeedbackLinearization::LookatQueueThread, this));
 }
 
 void FeedbackLinearization::SaveChild(std::string &prefix, std::ostream &stream)
@@ -248,7 +241,7 @@ void FeedbackLinearization::UpdateChild()
     double acc[3]={X_dd[0], X_dd[1], X_dd[2]};
     double jerk[3]={X_dd[6], X_dd[7], X_dd[8]};
 
-    double* FV=force_vector(position, X[5], this->goal, this->look_at, this->obstacle);
+    double* FV=force_vector(position, X[5], this->goal, this->obstacle);
     double* DP=damping(velocity, acc, jerk, X[11]);
 
     // Computing the V vector from the PDDDD.
@@ -305,6 +298,7 @@ void FeedbackLinearization::goalCallback(const geometry_msgs::Point::ConstPtr& g
   this->goal[0] = goal_msg->x;
   this->goal[1] = goal_msg->y;
   this->goal[2] = goal_msg->z;
+  this->goal[3] = 0; // TODO: Change message from Point to Pose and set this with `yaw`.
 
   lock.unlock();
 
@@ -374,30 +368,6 @@ void FeedbackLinearization::ObstacleQueueThread()
   while (rosnode_->ok())
   {
     queue_obstacle.callAvailable(ros::WallDuration(timeout));
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Callback function for the look at point topic
-void FeedbackLinearization::lookatCallback(const geometry_msgs::Point::ConstPtr& lookat_msg)
-{
-
-  lock.lock();
-
-  this->look_at[0] = lookat_msg->x;
-  this->look_at[1] = lookat_msg->y;
-  this->look_at[2] = lookat_msg->z;
-
-  lock.unlock();
-}
-
-void FeedbackLinearization::LookatQueueThread()
-{
-  static const double timeout = 0.01;
-
-  while (rosnode_->ok())
-  {
-    queue_lookat.callAvailable(ros::WallDuration(timeout));
   }
 }
 

@@ -114,14 +114,11 @@ class Entity;
             
             ros::Subscriber sub_goal;
             ros::Subscriber sub_obstacle;
-            ros::Subscriber sub_lookat;
             boost::mutex lock;
             ros::CallbackQueue queue_goal;
             ros::CallbackQueue queue_obstacle;
-            ros::CallbackQueue queue_lookat;
             boost::thread* goal_callback_queue_thread_;
             boost::thread* obstacle_callback_queue_thread_;
-            boost::thread* lookat_callback_queue_thread_;
             
             /*
               QUADROTOR STATE
@@ -136,7 +133,6 @@ class Entity;
             double  U1_reale;
             double* goal;
             double* obstacle;
-            double* look_at;
             FILE* id;
             
             void goalCallback(const geometry_msgs::Point::ConstPtr& goal_msg);
